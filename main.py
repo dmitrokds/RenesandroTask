@@ -7,20 +7,38 @@ import traceback
 from fastapi import FastAPI
 import uvicorn
 from routers.process_media import router as process_media_router
+from routers.auth import router as auth_router
 
 from pathlib import Path
 
+import config
+
+import media_looper
 
 
+async def safe_run(coro, name):
+    while True:
+        try:
+            logging.info(f"🔁 Starting task: {name}")
+            await coro()
+        except Exception:
+            error = traceback.format_exc()
+            logging.error(f"❌ Task '{name}' error; {error}")
+            logging.exception(f"❌ Task '{name}' failed; restarting in 2 seconds")
+            
+            await asyncio.sleep(2)
+        else:
+            break
 
 async def main():
     app = FastAPI(title="Renesandro Task API")
     app.include_router(process_media_router, prefix="/process_media", tags=["Media proccessing"])
+    app.include_router(auth_router, prefix="/auth", tags=["Auth"])
     
 
     api_config = uvicorn.Config(
         app=app,
-        # host="",
+        host=config.HOST,
         port=3000,
         log_level="info",
     )
@@ -29,7 +47,8 @@ async def main():
     
     
     await asyncio.gather(
-        api_server.serve()
+        safe_run(api_server.serve, "api"),
+        safe_run(media_looper.init, "looper")
     )
 
     

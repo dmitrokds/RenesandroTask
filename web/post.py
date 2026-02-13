@@ -25,6 +25,7 @@ async def get_session() -> aiohttp.ClientSession:
 
 
 async def init(url: str, headers: dict, data: dict|None = None):
+    logging.indo(f"request POST ({url}) [{data}]")
     MAX_TRIES = 5
     for time in range(MAX_TRIES):
         try:
@@ -52,6 +53,8 @@ async def init(url: str, headers: dict, data: dict|None = None):
 import tempfile
 
 async def file(url: str, suffix: str, headers: dict, data: dict|None = None):
+    logging.info(f"request POST ({url}) [{data}]")
+    
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
         tmp_path = f.name
         

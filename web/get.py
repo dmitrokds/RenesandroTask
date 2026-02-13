@@ -27,6 +27,8 @@ async def get_session() -> aiohttp.ClientSession:
 
 
 async def init(url: str, headers: dict, data: dict|None = None):
+    logging.info(f"request GET ({url}) [{data}]")
+    
     MAX_TRIES = 5
     for time in range(MAX_TRIES):
         try:
@@ -56,12 +58,13 @@ async def file(url: str, suffix: str):
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
         tmp_path = f.name
         
-    MAX_TRIES = 5
+    logging.info(f"request GET ({url})")
+    MAX_TRIES = 1
     for time in range(MAX_TRIES):
         try:
             session = await get_session()
             async with semaphore:
-                async with session.get(url) as resp:                    
+                async with session.get(url) as resp:
                     with open(tmp_path, "wb") as out:
                         async for chunk in resp.content.iter_chunked(1024 * 1024):
                             out.write(chunk)

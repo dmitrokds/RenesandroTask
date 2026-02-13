@@ -6,6 +6,7 @@ import logging
 
 
 async def connect(video_urls: list):
+    logging.info(video_urls)
     stack_open = []
     stack_result = []
     for video_url in video_urls[0]:
@@ -14,7 +15,7 @@ async def connect(video_urls: list):
             logging.info(f"File {video_url} wasnt successfully proccessed; status - {status}")
             continue
         
-        stack_open.append(VideoFileClip(video_path))
+        stack_open.append(VideoFileClip(video_path, audio=False))
     
     for block in video_urls[1:]:
         for video_url in block:
