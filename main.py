@@ -8,7 +8,7 @@ from fastapi import FastAPI
 import uvicorn
 from routers.process_media import router as process_media_router
 
-import os
+from pathlib import Path
 
 
 
@@ -39,8 +39,7 @@ if __name__ == "__main__":
     # Create folders
     folders = ["logs"]
     for f in folders:
-        if not os.path.exists(f):
-            os.makedirs(f)
+        Path(f).mkdir(exist_ok=True, parents=True)
 
 
 

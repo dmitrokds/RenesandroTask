@@ -2,11 +2,15 @@ from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+import config
+
 import logging
 import traceback
 
 import asyncio
 
+import time
+from pathlib import Path
 
 
 
@@ -75,12 +79,35 @@ async def catch(
                     }
                 )
                 
-    import media.video
+    import media.video, media.audio, media.text
     
     videos = await media.video.connect(
         list(payload.video_blocks.values())
     )
-                
+    
+    videos_with_audio = await media.audio.connect(
+        videos, list(payload.audio_blocks.values())
+    )
+    
+    resp = await media.text.connect(
+        videos_with_audio, [{"text": block.text, "voice": block.voice}for block in payload.text_to_speech]
+    )
+    
+    Path(f"cache/{payload.task_name}").mkdir(exist_ok=True, parents=True)
+    for i, video in enumerate(resp):
+        video.write_videofile(
+            f"cache/{payload.task_name}/out{i}.mp4",
+            preset="ultrafast",
+            threads=8,
+            fps=config.FPS,
+            audio=True
+        )
+    
+    import google_drive
+    FOLDER_NAME = f"{payload.task_name}-{time.time()}"
+    folder_id = google_drive.create_folder(FOLDER_NAME, config.MAIN_FOLDER_ID)
+    for file in list(Path(f"cache/{payload.task_name}/").glob("*.mp4")):
+        google_drive.upload_file(str(file.absolute()), folder_id)
     
 
     return JSONResponse(

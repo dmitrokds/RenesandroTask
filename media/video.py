@@ -34,5 +34,4 @@ async def connect(video_urls: list):
             stack_open = stack_result.copy()
             stack_result.clear()
         
-    for i, video in enumerate(stack_open):
-        video.write_videofile(f"test/out{i}.mp4", codec="libx264", audio_codec="aac")
+    return stack_open
