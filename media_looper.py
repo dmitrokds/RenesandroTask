@@ -21,7 +21,7 @@ async def init():
         await redis_config.r.hset(item["id"], mapping={"status": "processing"})
         
         try:
-            await run(item["video_blocks"], item["audio_blocks"], item["text_to_speech"], item["task_name"])
+            await run(item["id"], item["video_blocks"], item["audio_blocks"], item["text_to_speech"], item["task_name"])
             await redis_config.r.hset(item["id"], mapping={
                 "status": "done",
             })
@@ -34,20 +34,30 @@ async def init():
         await asyncio.sleep(5)
             
             
-async def run(video_blocks: list, audio_blocks: list, text_to_speech: list, task_name: str):
+async def run(id: str, video_blocks: list, audio_blocks: list, text_to_speech: list, task_name: str):
     import media.video, media.audio, media.text
     
+    start1 = time.time()
     videos = await media.video.connect(
         list(video_blocks.values())
     )
+    
+    start2 = time.time()
+    logging.info(f"ID: {id} - video blocks proccessed; Len - {len(videos)}; Time - {start2-start1}")
     
     videos_with_audio = await media.audio.connect(
         videos, list(audio_blocks.values())
     )
     
+    start3 = time.time()
+    logging.info(f"ID: {id} - audio blocks proccessed; Len - {len(videos_with_audio)}; Time - {start3-start2}")
+    
     resp = await media.text.connect(
-        videos_with_audio, [{"text": block.text, "voice": block.voice}for block in text_to_speech]
+        videos_with_audio, text_to_speech
     )
+    
+    start4 = time.time()
+    logging.info(f"ID: {id} - speech blocks proccessed; Len - {len(resp)}; Time - {start4-start3}")
     
     Path(f"cache/{task_name}").mkdir(exist_ok=True, parents=True)
     for i, video in enumerate(resp):
@@ -64,3 +74,5 @@ async def run(video_blocks: list, audio_blocks: list, text_to_speech: list, task
     folder_id = google_drive.create_folder(FOLDER_NAME, config.MAIN_FOLDER_ID)
     for file in list(Path(f"cache/{task_name}/").glob("*.mp4")):
         google_drive.upload_file(str(file.absolute()), folder_id)
+        
+    logging.info(f"ID: {id} - res saved; OverallTime - {time.time()-start1}")

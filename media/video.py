@@ -6,7 +6,6 @@ import logging
 
 
 async def connect(video_urls: list):
-    logging.info(video_urls)
     stack_open = []
     stack_result = []
     for video_url in video_urls[0]:
@@ -32,7 +31,7 @@ async def connect(video_urls: list):
                 ]
             )
             
-            stack_open = stack_result.copy()
-            stack_result.clear()
+        stack_open = stack_result.copy()
+        stack_result.clear()
         
     return stack_open

@@ -183,7 +183,7 @@ async def catch(
     "/status/{media_id}",
     summary="Get media status"
 )
-async def catch(
+async def status(
     media_id: str,
     jwt_payload: dict = Depends(require_jwt)
 ):
