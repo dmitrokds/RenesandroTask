@@ -177,3 +177,14 @@ redis - черга яка зберігається
 jose - для jwt
 
 google.oauth2 - для роботи з гугл діском
+
+
+
+## Test
+Посилання на гугл диск
+```https://drive.google.com/drive/folders/1z_undwQoDpJRxjfwrDb1SwwMHACNBu7_?usp=sharing```
+
+ПОсилання на тест апі - розмістив на ukraine.com.ua бізнес хостинг
+```http://3384371.mf5f.web.hosting-test.net/docs```
+Те що він буде працювати не можу обещать бо сервер дуже слабкий але подивитись може щось потестити можна
+А ще він не підтримує докер
